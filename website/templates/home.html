@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Songs</h1>
+
+{% if user.is_artist %}
+{% if user.songs %}
+<h3 align="center">My Songs</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Release Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for song in user.songs %}
+    <tr>
+      <td>{{ song.title }}</td>
+      <td>{{ song.release_date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endif %}
+
+<hr>
+<h3 align="center">All Songs</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Release Date</th>
+      <th>Artist</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for song in songs %}
+    <tr>
+      <td>{{ song.title }}</td>
+      <td>{{ song.release_date }}</td>
+      <td>{{ song.artist.name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
