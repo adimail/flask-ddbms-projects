@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+{% if current_user.is_pilot %}
+{% if current_user.flights %}
+<h3 align="center">My Flights</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Gate</th>
+      <th>Origin</th>
+      <th>Destination</th>
+      <th>Aircraft</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for flight in current_user.flights %}
+    <tr>
+      <td>{{ flight.gate }}</td>
+      <td>{{ flight.origin }}</td>
+      <td>{{ flight.destination }}</td>
+      <td>{{ flight.aircraft }}</td>
+      <td>{{ flight.duration }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>You have no flights added. Add your first flight through your profile page</p>
+{% endif %}
+{% endif %}
+
+<h3 align="center">All Flights</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Gate</th>
+      <th>Origin</th>
+      <th>Destination</th>
+      <th>Aircraft</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for flight in allflights %}
+    <tr>
+      <td>{{ flight.gate }}</td>
+      <td>{{ flight.origin }}</td>
+      <td>{{ flight.destination }}</td>
+      <td>{{ flight.aircraft }}</td>
+      <td>{{ flight.duration }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

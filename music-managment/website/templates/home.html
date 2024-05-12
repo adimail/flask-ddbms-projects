@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<h1>Songs</h1>
 
 {% if user.is_artist %}
 {% if user.songs %}
@@ -22,10 +21,10 @@
     {% endfor %}
   </tbody>
 </table>
+<hr>
 {% endif %}
 {% endif %}
 
-<hr>
 <h3 align="center">All Songs</h3>
 <table class="table table-striped">
   <thead>
@@ -33,6 +32,7 @@
       <th>Title</th>
       <th>Release Date</th>
       <th>Artist</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
@@ -41,8 +41,20 @@
       <td>{{ song.title }}</td>
       <td>{{ song.release_date }}</td>
       <td>{{ song.artist.name }}</td>
+      <td>
+        {% if song.id in liked_songs %}
+        <form action="{{ url_for('views.unlike_song', song_id=song.id) }}" method="post">
+          <button type="submit" class="btn btn-primary">Unlike</button>
+        </form>
+        {% else %}
+        <form action="{{ url_for('views.like_song', song_id=song.id) }}" method="post">
+          <button type="submit" class="btn btn-primary">Like</button>
+        </form>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}

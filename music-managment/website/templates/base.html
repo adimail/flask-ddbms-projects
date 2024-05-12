@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    crossorigin="anonymous" />
+
+  <link rel="icon" type="image/x-icon" href="/logo.ico">
+
+  <title>{% block title %}Home{% endblock %}</title>
+
+  <style>
+    .navbar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 250px;
+      background-color: #343a40;
+      padding-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+      align-items: flex-start;
+    }
+
+    .navbar-brand {
+      font-size: 2rem;
+      margin-right: 2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .navbar-nav {
+      margin-bottom: 1rem;
+    }
+
+    .nav-link {
+      color: #a2a2a2;
+    }
+
+    .content {
+      margin-left: 250px;
+      padding: 2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="/">Mingo Bingo</a>
+    <div style="width: 100%;">
+      {% if user.is_authenticated %}
+      <ul class="navbar-nav">
+        <li>
+          <a class="nav-link" id="home" href="/">Home</a>
+        </li>
+        <li>
+          <a class="nav-link" id="manage" href="/manage">Profile</a>
+        </li>
+        <li>
+          <a class="nav-link" id="search" href="/search">search</a>
+        </li>
+        <li>
+          <a class="nav-link" id="logout" href="#" onclick="confirmLogout()">Logout</a>
+        </li>
+      </ul>
+      <h4 style="color: #d4d4d4;">Liked Songs</h4>
+      <ul class="navbar-nav">
+        {% for song in songs %}
+        {% if song.id in liked_songs %}
+        <li>
+          <a class="liked-song" href="#">{{ song.title }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      
+      {% else %}
+      <ul class="navbar-nav">
+        <li>
+          <a class="nav-link" id="manage" href="/guest">Continue as guest</a>
+        </li>
+        <li>
+          <a class="nav-link" id="home" href="/login">Login in</a>
+        </li>
+        <li>
+          <a class="nav-link" id="manage" href="/sign-up">Join</a>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %} {% if category ==
+    'error' %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% else %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %} {% endfor %} {% endif %} {% endwith %}
+
+    <div class="container">
+      {% block content %} {% endblock %}
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
+  {% block javascript %}
+  <script type="text/javascript">
+    function confirmLogout() {
+      const dialog = document.getElementById('logoutConfirmation');
+      dialog.showModal();
+    }
+
+    function logout() {
+      window.location.href = "/logout";
+    }
+  </script>
+  {% endblock %}
+</body>
+
+<!-- Confirmation Dialog for Logout -->
+<dialog id="logoutConfirmation">
+  <p>Are you sure you want to log out?</p>
+  <button onclick="logout()">Yes</button>
+  <button onclick="document.getElementById('logoutConfirmation').close()">No</button>
+</dialog>
+
+</html>

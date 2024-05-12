@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="col-lg-6">
+        {% if not user.is_pilot %}
+        <h1>User Details</h1>
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Date of Birth:</strong> {{ user.date_of_birth }}</p>
+
+        {% else %}
+        <h1>Pilot Details</h1>
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Date of Birth:</strong> {{ user.date_of_birth }}</p>
+        {% if user.flights %}
+        <p><strong>Total Flights:</strong> {{ user.flights|length }}</p>
+        <p><strong>Planes Flown:</strong></p>
+        <ul>
+            {% for flight in user.flights %}
+            <li>{{ flight.aircraft }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No flights found for this pilot.</p>
+        {% endif %}
+        {% endif %}
+    </div>
+    <br>
+    <hr>
+    <br>
+    <div class="row">
+        <!-- Left column for user's bookings -->
+    <div class="col-lg-8">
+        {% if not user.is_pilot %}
+        {% if booked_flights %}
+        <h1>My Bookings</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Flight Details</th>
+                    <th>Duration</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in booked_flights %}
+                <tr>
+                    <td>
+                        {{ flight.origin }} -> {{ flight.destination }}
+                        <br>
+                        {{ flight.aircraft }}
+                    </td>
+                    <td>
+                        {{ flight.duration }} hours
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger" onClick="confirmCancelBooking('{{ flight.id }}')">
+                            Cancel Booking
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>You have no flights booked</p>
+        {% endif %}
+        {% else %}
+        {% if user.flights %}
+        <h1>My Flights</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Gate</th>
+                    <th>Journey</th>
+                    <th>Aircraft</th>
+                    <th>Duration</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in user.flights %}
+                <tr>
+                    <td>{{ flight.gate }}</td>
+                    <td>{{ flight.origin }} -> {{ flight.destination }}</td>
+                    <td>{{ flight.aircraft }}</td>
+                    <td>{{ flight.duration }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger" onClick="confirmDeleteFlight('{{ flight.id }}')">
+                            Delete flight
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="center">You have no flights.</p>
+        {% endif %}
+        {% endif %}
+    </div>
+
+
+        <!-- Right column for booking/canceling flights -->
+        <div class="col-lg-4">
+            <!-- Show available flights for booking -->
+            {% if not user.is_pilot %}
+            <form method="POST">
+                <h2>Book a Flight</h2>
+                <hr>
+                <div class="form-group">
+                    <label for="flight_id">Select Flight</label>
+                    <select class="form-control" id="flight_id" name="flight_id" required>
+                        {% for flight in available_flights %}
+                        <option value="{{ flight.id }}">{{ flight.origin }} to {{ flight.destination }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <br />
+                <div align="center">
+                    <button type="submit" class="btn btn-primary">Book Flight</button>
+                </div>
+            </form>
+            {% endif %}
+
+            <!-- Allow pilots to add flights -->
+            {% if user.is_pilot %}
+            <form method="POST">
+                <h2>Add a Flight</h2>
+                <hr>
+                <div class="form-group">
+                    <label for="gate">Gate</label>
+                    <select class="form-control" id="gate" name="gate" required>
+                        <option value="">Select Gate</option>
+                        <option value="23">23</option>
+                        <option value="29">29</option>
+                        <option value="37">37</option>
+                        <option value="41">41</option>
+                        <option value="61">61</option>
+                        <option value="79">79</option>
+                        <option value="97">97</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="origin">Origin</label>
+                    <select class="form-control" id="origin" name="origin" onchange="updateDestinationOptions()" required>
+                        <option value="">Select Origin</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Bangalore">Bangalore</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Kolkata">Kolkata</option>
+                        <option value="Pune">Pune</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="destination">Destination</label>
+                    <select class="form-control" id="destination" name="destination" required>
+                        <option value="">Select Destination</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Bangalore">Bangalore</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Kolkata">Kolkata</option>
+                        <option value="Pune">Pune</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="aircraft">Aircraft</label>
+                    <select class="form-control" id="aircraft" name="aircraft" required>
+                        <option value="">Select Aircraft</option>
+                        <option value="Boeing 737">Boeing 737</option>
+                        <option value="Airbus A320">Airbus A320</option>
+                        <option value="Boeing 747">Boeing 747</option>
+                        <option value="Airbus A380">Airbus A380</option>
+                        <option value="Boeing 777">Boeing 777</option>
+                        <option value="Airbus A330">Airbus A330</option>
+                        <option value="Embraer E190">Embraer E190</option>
+                        <option value="Boeing 787">Boeing 787</option>
+                        <option value="Airbus A350">Airbus A350</option>
+                        <option value="Boeing 757">Boeing 757</option>
+                        <option value="Airbus A319">Airbus A319</option>
+                        <option value="Airbus A321">Airbus A321</option>
+                        <option value="Boeing 767">Boeing 767</option>
+                        <option value="Embraer E175">Embraer E175</option>
+                        <option value="Bombardier CRJ900">Bombardier CRJ900</option>
+                        <option value="Boeing 737 MAX">Boeing 737 MAX</option>
+                        <option value="Boeing 777X">Boeing 777X</option>
+                        <option value="Airbus A330neo">Airbus A330neo</option>
+                        <option value="Boeing 757-300">Boeing 757-300</option>
+                        <option value="Embraer E195">Embraer E195</option>
+                    </select>
+                </div>
+            
+                <div class="form-group">
+                    <label for="duration">Duration in hours</label>
+                    <input type="number" step="0.01" class="form-control" id="duration" name="duration" readonly />
+                </div>
+                <br />
+                <div align="center">
+                    <button type="submit" class="btn btn-primary">Add Flight</button>
+                </div>
+            </form>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<dialog id="deleteFlightConfirmation">
+    <p>Are you sure you want to delete this flight?</p>
+    <button id="confirmDeleteFlightButton">Yes</button>
+    <button id="cancelDeleteFlightButton">No</button>
+</dialog>
+
+<!-- Confirmation Dialog for Deleting Bookings -->
+<dialog id="deletebookingConfirmation">
+    <p>Are you sure you want to delete this booking?</p>
+    <button id="confirmdeletebookingButton">Yes</button>
+    <button id="cancelbookingdeletebookingButton">No</button>
+</dialog>
+
+<script>
+    
+    const flightDurations = {
+            'Delhi-Delhi': 0,
+            'Delhi-Mumbai': 2,
+            'Delhi-Bangalore': 3,
+            'Delhi-Chennai': 4,
+            'Delhi-Kolkata': 2,
+            'Delhi-Pune': 3,
+            'Mumbai-Delhi': 2,
+            'Mumbai-Mumbai': 0,
+            'Mumbai-Bangalore': 2.5,
+            'Mumbai-Chennai': 3.5,
+            'Mumbai-Kolkata': 2.5,
+            'Mumbai-Pune': 2,
+            'Bangalore-Delhi': 3,
+            'Bangalore-Mumbai': 2.5,
+            'Bangalore-Bangalore': 0,
+            'Bangalore-Chennai': 2,
+            'Bangalore-Kolkata': 2.5,
+            'Bangalore-Pune': 2.5,
+            'Chennai-Delhi': 4,
+            'Chennai-Mumbai': 3.5,
+            'Chennai-Bangalore': 2,
+            'Chennai-Chennai': 0,
+            'Chennai-Kolkata': 2,
+            'Chennai-Pune': 3,
+            'Kolkata-Delhi': 2,
+            'Kolkata-Mumbai': 2.5,
+            'Kolkata-Bangalore': 2.5,
+            'Kolkata-Chennai': 2,
+            'Kolkata-Kolkata': 0,
+            'Kolkata-Pune': 3,
+            'Pune-Delhi': 3,
+            'Pune-Mumbai': 2,
+            'Pune-Bangalore': 2.5,
+            'Pune-Chennai': 3,
+            'Pune-Kolkata': 3,
+            'Pune-Pune': 0
+        };
+
+    function updateDuration() {
+        const origin = document.getElementById('origin').value;
+        const destination = document.getElementById('destination').value;
+        const durationInput = document.getElementById('duration');
+
+        if (origin && destination) {
+            const key1 = `${origin}-${destination}`;
+            const key2 = `${destination}-${origin}`;
+
+            const duration = flightDurations[key1] || flightDurations[key2];
+
+            if (duration) {
+                durationInput.value = duration;
+            } else {
+                durationInput.value = '';
+            }
+        } else {
+            durationInput.value = '';
+        }
+    }
+
+    document.getElementById('origin').addEventListener('change', updateDuration);
+    document.getElementById('destination').addEventListener('change', updateDuration);
+    updateDuration();
+
+    function updateDestinationOptions() {
+            const origin = document.getElementById('origin').value;
+            const destinationOptions = document.getElementById('destination').getElementsByTagName('option');
+
+            for (let i = 0; i < destinationOptions.length; i++) {
+                destinationOptions[i].disabled = false;
+            }
+
+            for (let i = 0; i < destinationOptions.length; i++) {
+                if (destinationOptions[i].value === origin) {
+                    destinationOptions[i].disabled = true;
+                }
+            }
+        }
+
+    updateDestinationOptions();
+
+    function confirmCancelBooking(flight_id) {
+        const dialog = document.getElementById('deletebookingConfirmation');
+        dialog.showModal();
+
+        const confirmButton = document.getElementById('confirmdeletebookingButton');
+        const cancelButton = document.getElementById('cancelbookingdeletebookingButton');
+
+        confirmButton.onclick = function () {
+            deleteBooking(flight_id);
+            dialog.close();
+        };
+
+        cancelButton.onclick = function () {
+            dialog.close();
+        };
+    }
+    
+    function confirmDeleteFlight(flight_id) {
+        const dialog = document.getElementById('deleteFlightConfirmation');
+        dialog.showModal();
+
+        const confirmButton = document.getElementById('confirmDeleteFlightButton');
+        const cancelButton = document.getElementById('cancelDeleteFlightButton');
+
+        confirmButton.onclick = function () {
+            deleteFlight(flight_id);
+            dialog.close();
+        };
+
+        cancelButton.onclick = function () {
+            dialog.close();
+        };
+    }
+
+    function deleteFlight(flight_id) {
+        fetch("/delete-flight", {
+            method: "POST",
+            body: JSON.stringify({ flight_id: flight_id }),
+        }).then(window.location.href = "/")
+    }
+    
+    function deleteBooking(flight_id) {
+        fetch("/delete-booking", {
+            method: "POST",
+            body: JSON.stringify({ flight_id: flight_id }),
+        }).then(window.location.href = "/")
+    }
+</script>
+
+{% endblock %}
