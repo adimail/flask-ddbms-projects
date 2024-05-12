@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, session
 from flask_login import login_required, current_user
 from .models import Song, LikedSongs
 from . import db
@@ -61,14 +61,16 @@ def like_song(song_id):
     song = Song.query.get(song_id)
     if song:
         already_liked = LikedSongs.query.filter_by(user_id=current_user.id, song_id=song_id).first()
-        if already_liked:
-            pass
-        else:
+        if not already_liked:
             new_liked_song = LikedSongs(user_id=current_user.id, song_id=song_id)
             db.session.add(new_liked_song)
             db.session.commit()
     
-    return redirect(url_for('views.home'))
+    # Store the referrer URL in session
+    session['referrer'] = request.referrer
+    
+    # Redirect to the referrer URL
+    return redirect(session.get('referrer', url_for('views.home')))
 
 @views.route('/unlike/<int:song_id>', methods=['POST'])
 @login_required
@@ -80,4 +82,8 @@ def unlike_song(song_id):
             db.session.delete(liked_song)
             db.session.commit()
     
-    return redirect(url_for('views.home'))
+    # Store the referrer URL in session
+    session['referrer'] = request.referrer
+    
+    # Redirect to the referrer URL
+    return redirect(session.get('referrer', url_for('views.home')))

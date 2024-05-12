@@ -39,6 +39,18 @@
       margin-bottom: 1rem;
     }
 
+    .liked-song {
+      color: #a2a2a2;
+      padding: 0;
+      margin: 0;
+    }
+
+    .liked-song:hover {
+      color: #a2a2a2;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     .nav-link {
       color: #a2a2a2;
     }
@@ -74,7 +86,7 @@
         {% for song in songs %}
         {% if song.id in liked_songs %}
         <li>
-          <a class="liked-song" href="#">{{ song.title }}</a>
+          <p class="liked-song" onclick="confirmUnlike('{{ song.id }}')" >{{ song.title }}</p>
         </li>
         {% endif %}
         {% endfor %}
@@ -83,13 +95,13 @@
       {% else %}
       <ul class="navbar-nav">
         <li>
-          <a class="nav-link" id="manage" href="/guest">Continue as guest</a>
+          <a class="liked-song" id="manage" href="/guest">Continue as guest</a>
         </li>
         <li>
-          <a class="nav-link" id="home" href="/login">Login in</a>
+          <a class="liked-song" id="home" href="/login">Login in</a>
         </li>
         <li>
-          <a class="nav-link" id="manage" href="/sign-up">Join</a>
+          <a class="liked-song" id="manage" href="/sign-up">Join</a>
         </li>
       </ul>
       {% endif %}
@@ -121,6 +133,12 @@
     </div>
   </div>
 
+  <dialog id="unlikeConfirmation">
+    <p>Are you sure you want to unlike this song?</p>
+    <button id="confirmUnlikeButton">Yes</button>
+    <button id="cancelUnlikeButton">No</button>
+  </dialog>
+
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
     crossorigin="anonymous"></script>
@@ -141,6 +159,31 @@
     function logout() {
       window.location.href = "/logout";
     }
+
+    function confirmUnlike(songId) {
+        const dialog = document.getElementById('unlikeConfirmation');
+        dialog.showModal();
+
+        const confirmButton = document.getElementById('confirmUnlikeButton');
+        const cancelButton = document.getElementById('cancelUnlikeButton');
+
+        confirmButton.onclick = function () {
+          unlikeSong(songId);
+          dialog.close();
+        };
+
+        cancelButton.onclick = function () {
+          dialog.close();
+        };
+      }
+
+      function unlikeSong(songId) {
+        fetch("/unlike/" + songId, {
+          method: "POST",
+          body: JSON.stringify({ songId: songId }),
+        }).then(window.location.reload());
+      }
+
   </script>
   {% endblock %}
 </body>
